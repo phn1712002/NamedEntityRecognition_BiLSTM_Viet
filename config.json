@@ -1,0 +1,38 @@
+{
+    "config_model":{
+        "name": "NER_BiLSTM",
+        "max_len": 100,
+        "embedding_dim": 40,
+        "num_layers": 1,
+        "hidden_size": 50,
+        "rate_dropout": 0.5
+    },
+    "config_train":{
+        "epochs": 1,
+        "batch_size_train": 8,
+        "batch_size_dev": 8,
+        "checkpoint": {
+            "monitor": "val_loss",
+            "mode": "auto",
+            "verbose": 1
+        }
+    },
+    "config_wandb":{
+        "using": false,
+        "api_key": "",
+        "project": "",
+        "name": "",
+        "sync_tensorboard": true
+    },
+    "config_dataset":{
+        "path_json_vocab": "./Dataset/raw/config_vocab.json",
+        "path_json_tags": "./Dataset/raw/config_tags.json"
+    },
+    "config_opt":{
+        "learning_rate": 0.01
+    },
+    "config_other":{
+        "summary": true,
+        "warning": false
+    }
+}

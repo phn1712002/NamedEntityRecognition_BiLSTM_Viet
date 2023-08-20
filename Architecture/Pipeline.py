@@ -1,0 +1,29 @@
+import tensorflow as tf
+import numpy as np
+from Architecture.Model import NERBiLSTM
+from Tools.NLP import MapToIndex
+from keras import Model
+class PipelineNERBiLSTM(NERBiLSTM):
+    def __init__(self, tags_map: MapToIndex, vocab_map: MapToIndex, config_model=None):
+        
+        super().__init__(tags_map=tags_map, vocab_map=vocab_map, opt=None, loss=None, **config_model)
+    
+    def predictInCallbacks(self, model:Model, input_tf=None):
+        
+        output_tf  = model.predict_on_batch(input_tf)
+        output = super().decoderLable(output_tf)
+        output = np.squeeze(output)
+        return ' '.join(output)
+    
+    def mapProcessing(self, seq, lable):
+       
+        seq = tf.numpy_function(super().encoderSeq, inp=[seq], Tout=tf.int32)
+        lable = tf.numpy_function(super().encoderLable, inp=[lable], Tout=tf.int32)
+        return (seq, lable)
+    
+    def __call__(self, dataset, batch_size):
+        data = tf.data.Dataset.from_tensor_slices(dataset)
+        data = (data.map(self.mapProcessing, num_parallel_calls=tf.data.AUTOTUNE)
+                .padded_batch(batch_size, padded_shapes=(tf.TensorShape([self.max_len, ]), tf.TensorShape([self.max_len, self.num_tags])))
+                .prefetch(buffer_size=tf.data.AUTOTUNE))
+        return data

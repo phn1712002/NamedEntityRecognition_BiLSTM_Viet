@@ -1,0 +1,6 @@
+tensorflow
+wandb
+pandas
+h5py
+numpy
+
