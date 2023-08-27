@@ -1,8 +1,8 @@
 {
     "config_wandb":{
         "api_key": "",
-        "project": "debug",
-        "count": 10
+        "project": "NamedEntityRecognition_BiLSTM_Viet",
+        "count": 20
     },
     "config_dataset":{
         "path_json_vocab": "./Dataset/raw/config_vocab.json",
@@ -15,32 +15,30 @@
     "config_sweep":{
         "method": "random",
         "metric": {
-            "name": "loss",
-            "goal": "minimize"
+            "name": "accuracy",
+            "goal": "maximize"
         },
         "parameters": {
             "max_len":{
                 "value": 10
             },
             "embedding_dim":{
-                "values": [40, 50, 60]
+                "value": 60
             },
             "num_layers":{
-                "values": [1, 2, 3]
+                "values": [1,2,3,4]
             },
             "hidden_size":{
                 "values": [128, 256, 512]
             },
             "rate_dropout":{
-                "values": [0.25, 0.35, 0.45, 0.5]
+                "value": 0.5
             },
             "learning_rate":{
-                "distribution": "uniform",
-                "min": -4,
-                "max": -2
+                "value": -2
             },
             "batch_size_train":{
-                "values": [8, 16]
+                "value": 16
             },
             "batch_size_dev":{
                 "value": 8
