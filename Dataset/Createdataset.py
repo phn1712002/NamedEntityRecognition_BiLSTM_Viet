@@ -9,6 +9,6 @@ class DatasetNERBiLSTM():
         self._test_dataset = None
         
     def __call__(self):
-        #self._train_dataset = importTXT(path=self.path + 'raw/')()
-        self._train_dataset, self._dev_dataset, self._test_dataset = importCSV(path=self.path)()
+        self._train_dataset = importTXT(path=self.path + 'raw/')()
+        #self._train_dataset, self._dev_dataset, self._test_dataset = importCSV(path=self.path)()
         return self._train_dataset, self._dev_dataset, self._test_dataset
