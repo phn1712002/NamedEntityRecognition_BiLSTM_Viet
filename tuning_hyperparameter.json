@@ -23,7 +23,7 @@
                 "value": "accuracy"
             },
             "patience":{
-                "value": "5"
+                "value": 5
             },
             "max_len":{
                 "value": 10
