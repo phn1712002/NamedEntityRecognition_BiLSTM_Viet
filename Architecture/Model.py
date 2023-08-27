@@ -6,7 +6,7 @@ from keras.layers import LSTM, Embedding, Dense, Bidirectional, TimeDistributed,
 from Tools.NLP import MapToIndex
 
 class CustomModel():
-    def __init__(self, vocab_map: MapToIndex, tags_map: MapToIndex, model=Model(), loss=losses.mse, opt=optimizers.Adam()):
+    def __init__(self, vocab_map: MapToIndex, tags_map: MapToIndex, model=Model(), loss=losses.CategoricalCrossentropy(from_logits=True), opt=optimizers.Adam()):
         self.vocab_map = vocab_map
         self.tags_map = tags_map
         self.model = model
@@ -36,7 +36,7 @@ class NERBiLSTM(CustomModel):
                  hidden_size=512,
                  rate_dropout=0.5,
                  opt=optimizers.Adam(),
-                 loss=losses.categorical_crossentropy):
+                 loss=losses.CategoricalCrossentropy(from_logits=True)):
         super().__init__(vocab_map=vocab_map, tags_map=tags_map, model=None, opt=opt, loss=loss)
         self.name = name
         self.max_len = max_len
