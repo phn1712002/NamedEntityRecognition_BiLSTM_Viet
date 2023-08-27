@@ -13,12 +13,12 @@ class importCSV():
             temp = list()
             for X in train_dataset.keys():
                 temp.append([convert(i) for i in train_dataset[X]])
-            self._train_dataset = list(temp[0]), list(temp[1])
+            _train_dataset = list(temp[0]), list(temp[1])
 
             dev_dataset = loadH5(self.path + 'raw/dev_dataset.h5')
             temp = []
             for X in dev_dataset.keys():
                 temp.append([convert(i) for i in dev_dataset[X]])
-            self._dev_dataset = list(temp[0]), list(temp[1])
+            _dev_dataset = list(temp[0]), list(temp[1])
 
-            return self._train_dataset, self._dev_dataset, self._test_dataset
+            return _train_dataset, _dev_dataset, None
