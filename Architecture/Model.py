@@ -1,7 +1,7 @@
 import tensorflow as tf
 import numpy as np
 from keras.utils import to_categorical, pad_sequences
-from keras import optimizers, losses, utils, Model, Input
+from keras import optimizers, losses, utils, Model, Input, metrics
 from keras.layers import LSTM, Embedding, Dense, Bidirectional, TimeDistributed, Dropout
 from Tools.NLP import MapToIndex
 
@@ -63,7 +63,7 @@ class NERBiLSTM(CustomModel):
             output = TimeDistributed(dense, name="TimeDistributed")(X)
             
             model = Model(inputs=input, outputs=output, name=self.name)
-            model.compile(optimizer=self.opt, loss=self.loss)
+            model.compile(optimizer=self.opt, loss=self.loss, metrics=[metrics.Accuracy()])
         if summary:
             model.summary()
             
