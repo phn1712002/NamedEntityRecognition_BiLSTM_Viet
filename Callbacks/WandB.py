@@ -14,20 +14,23 @@ class CustomCallbacksWandB(Callback):
         self.__last_name_update = None
         
     def on_epoch_end(self, epoch: int, logs=None):
-        
-        # Print 1 mẫu 
-        tableOutputPredict = wandb.Table(columns=["Epoch", "Input", "Output"])
-        for X, _ in self.dev_dataset.take(1):
-            if not X.shape[0] == 1:
-                index = np.random.randint(low=0, high=X.shape[0] - 1)
-                X = X[index]
-                X = tf.expand_dims(X, axis=0)
-                
-        Y = self.pipeline.predictInCallbacks(self.model, X)  
-        X = self.pipeline.decoderSeq(X)
-        
-        tableOutputPredict.add_data(epoch + 1, X, Y)
-        wandb.log({'Predict': tableOutputPredict})
+        if not self.dev_dataset is None:
+            # Print 1 mẫu 
+            tableOutputPredict = wandb.Table(columns=["Epoch", "Input", "Output"])
+            for X, _ in self.dev_dataset.take(1):
+                if not X.shape[0] == 1:
+                    index = np.random.randint(low=0, high=X.shape[0] - 1)
+                    X = X[index]
+                    X = tf.expand_dims(X, axis=0)
+                    
+            output_tf  = self.model.predict_on_batch(X)
+            output = self.pipeline.decoderLable(output_tf)
+            output = np.squeeze(output)
+            Y = ' '.join(output)
+            X = self.pipeline.decoderSeq(X)
+            
+            tableOutputPredict.add_data(epoch + 1, X, Y)
+            wandb.log({'Predict': tableOutputPredict})
         
         # Cập nhật file weights model to cloud wandb
         path_file_update = getPathWeightsNearest(self.path_logs)

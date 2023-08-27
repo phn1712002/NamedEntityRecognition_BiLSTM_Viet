@@ -1,7 +1,7 @@
 {
     "config_model":{
         "name": "NER_BiLSTM",
-        "max_len": 100,
+        "max_len": 20,
         "embedding_dim": 40,
         "num_layers": 1,
         "hidden_size": 50,
@@ -12,7 +12,7 @@
         "batch_size_train": 8,
         "batch_size_dev": 8,
         "checkpoint": {
-            "monitor": "val_loss",
+            "monitor": "loss",
             "mode": "auto",
             "verbose": 1
         }

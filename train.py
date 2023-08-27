@@ -1,3 +1,14 @@
+import argparse, warnings, wandb
+from Tools.Json import loadJson
+from Tools.Callbacks import CreateCallbacks
+from Tools.Weights import loadNearest, loadWeights
+from Tools.TFLite import convertModelKerasToTflite
+from Dataset.Createdataset import DatasetNERBiLSTM
+from Tools.NLP import MapToIndex
+from Architecture.Pipeline import PipelineNERBiLSTM 
+from Optimizers.OptimizersNERBiLSTM import CustomOptimizers
+from Architecture.Model import NERBiLSTM
+
 # Environment Variables
 PATH_CONFIG = './config.json'
 PATH_DATASET = './Dataset/'
@@ -6,7 +17,6 @@ PATH_TENSORBOARD = './Checkpoint/tensorboard/'
 PATH_TFLITE = './Checkpoint/export/'
 
 # Argparse
-import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument('--pretrain_config', type=bool, default=False, help='Pretrain model BiLSTM in logs training in dataset')
 parser.add_argument('--path_file_pretrain', type=str, default='', help='Path file pretrain model')
@@ -14,7 +24,6 @@ parser.add_argument('--export_tflite', type=bool, default=False, help='Export to
 args = parser.parse_args()
 
 # Get config
-from Tools.Json import loadJson
 config = loadJson(PATH_CONFIG)
 if not config == None:
     keys_to_check = ['config_wandb', 'config_model', 'config_opt', 'config_other', 'config_train', 'config_dataset']
@@ -29,12 +38,10 @@ if not config == None:
         raise RuntimeError('Error config')
         
 # Turn off warning
-import warnings
 if not config_other['warning']:
     warnings.filterwarnings('ignore')
     
 # Load dataset
-from Dataset.Createdataset import DatasetNERBiLSTM
 train_raw_dataset, dev_raw_dataset, test_raw_dataset = DatasetNERBiLSTM(path=PATH_DATASET)()
 
 
@@ -43,12 +50,10 @@ config_vocab = loadJson(config_dataset['path_json_vocab'])
 config_tags = loadJson(config_dataset['path_json_tags'])
 
 # Init vocab and tags
-from Tools.NLP import MapToIndex
 vocab_map = MapToIndex().settingWithDict(config_vocab)
 tags_map = MapToIndex().settingWithDict(config_tags)
 
 # Create pipeline 
-from Architecture.Pipeline import PipelineNERBiLSTM   
 pipeline = PipelineNERBiLSTM(vocab_map=vocab_map, 
                                     tags_map = tags_map, 
                                     config_model=config_model)
@@ -64,11 +69,9 @@ dev_dataset = PipelineNERBiLSTM(vocab_map=vocab_map,
 
 
 # Create optimizers
-from Optimizers.OptimizersNERBiLSTM import CustomOptimizers
 opt_biLSTM = CustomOptimizers(**config_opt)()
 
 # Callbacks
-from Tools.Callbacks import CreateCallbacks
 callbacks_NER = CreateCallbacks(PATH_TENSORBOARD=PATH_TENSORBOARD, 
                                 PATH_LOGS=PATH_LOGS, 
                                 config=config, 
@@ -77,14 +80,12 @@ callbacks_NER = CreateCallbacks(PATH_TENSORBOARD=PATH_TENSORBOARD,
                                 pipeline=pipeline)
 
 # Create model
-from Architecture.Model import NERBiLSTM
 ner = NERBiLSTM(vocab_map=vocab_map, 
                  tags_map=tags_map,
                  opt=opt_biLSTM,
                  **config_model).build(summary=config_other['summary'])
 
 # Pretrain
-from Tools.Weights import loadNearest, loadWeights
 if args.pretrain_config:
     if args.path_file_pretrain == '':
         ner = loadNearest(class_model=ner, path_folder_logs=PATH_LOGS)
@@ -98,10 +99,8 @@ ner.fit(train_dataset=train_dataset,
         epochs=config_train['epochs'])
 
 # Export to tflite
-from Tools.TFLite import convertModelKerasToTflite
 if args.export_tflite:
     convertModelKerasToTflite(class_model=ner, path=PATH_TFLITE)
     
 # Off Wandb
-import wandb
 wandb.finish()
