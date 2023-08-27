@@ -1,11 +1,11 @@
 {
     "config_model":{
         "name": "NER_BiLSTM",
-        "max_len": 140,
-        "embedding_dim": 140,
-        "num_layers": 1,
-        "hidden_size": 100,
-        "rate_dropout": 0.25
+        "max_len": 10,
+        "embedding_dim": 60,
+        "num_layers": 2,
+        "hidden_size": 512,
+        "rate_dropout": 0.1
     },
     "config_train":{
         "epochs": 100,
@@ -21,7 +21,7 @@
         "using": true,
         "api_key": "",
         "project": "NamedEntityRecognition_BiLSTM_Viet",
-        "name": "4-train",
+        "name": "12-train",
         "sync_tensorboard": true
     },
     "config_dataset":{
