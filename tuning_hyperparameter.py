@@ -1,9 +1,19 @@
+import warnings, wandb, os
+from Tools.TuningHyper import splitDataset
+from Tools.Json import loadJson
+from Dataset.Createdataset import DatasetNERBiLSTM
+from Tools.NLP import MapToIndex
+from Architecture.Model import NERBiLSTM
+from Architecture.Pipeline import PipelineNERBiLSTM 
+from Optimizers.OptimizersNERBiLSTM import CustomOptimizers
+from wandb.keras import WandbCallback
+from keras.callbacks import EarlyStopping
+
 # Environment variables
 PATH_CONFIG = './tuning_hyperparameter.json'
 PATH_DATASET = './Dataset/'
 
 # Get config
-from Tools.Json import loadJson
 config = loadJson(PATH_CONFIG)
 if not config == None:
     keys_to_check = ['config_wandb', 'config_sweep', 'config_dataset', 'config_other']
@@ -16,22 +26,18 @@ if not config == None:
         raise RuntimeError('Error config')
 
 # Create Sweep WandB
-import wandb, os
 os.environ['WANDB_API_KEY'] = config_wandb['api_key']
 wandb.login()
 sweep_id = wandb.sweep(config_sweep, project=config_wandb['project'])
         
 # Turn off warning
-import warnings
 if not config_other['warning']:
     warnings.filterwarnings('ignore')
     
 # Load dataset
-from Dataset.Createdataset import DatasetNERBiLSTM
 train_raw_dataset, dev_raw_dataset, test_raw_dataset = DatasetNERBiLSTM(path=PATH_DATASET)()
 
 # Split dataset
-from Tools.TuningHyper import splitDataset
 train_raw_dataset = splitDataset(train_raw_dataset, size_dataset=config_dataset['size_dataset'])
 dev_raw_dataset = splitDataset(dev_raw_dataset, size_dataset=config_dataset['size_dataset'])
 
@@ -40,17 +46,11 @@ config_vocab = loadJson(config_dataset['path_json_vocab'])
 config_tags = loadJson(config_dataset['path_json_tags'])
 
 # Init vocab and tags
-from Tools.NLP import MapToIndex
 vocab_map = MapToIndex().settingWithDict(config_vocab)
 tags_map = MapToIndex().settingWithDict(config_tags)
 
 
 # Tuning Hyperparameter
-from Architecture.Model import NERBiLSTM
-from Architecture.Pipeline import PipelineNERBiLSTM 
-from Optimizers.OptimizersNERBiLSTM import CustomOptimizers
-from wandb.keras import WandbCallback
-from keras.callbacks import EarlyStopping
 def tuningHyperparamtrer(config=None):
     with wandb.init(config=config):
         config = wandb.config
