@@ -1,4 +1,3 @@
-from Tools.H5 import loadH5
 from Dataset.importTXT import importTXT
 from Dataset.importCSV import importCSV
 
