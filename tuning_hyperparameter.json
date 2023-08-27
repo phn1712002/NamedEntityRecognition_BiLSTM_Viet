@@ -1,13 +1,13 @@
 {
     "config_wandb":{
         "api_key": "",
-        "project": "Tuning BiLSTM NER",
+        "project": "debug",
         "count": 10
     },
     "config_dataset":{
         "path_json_vocab": "./Dataset/raw/config_vocab.json",
         "path_json_tags": "./Dataset/raw/config_tags.json",
-        "size_dataset": 0.5
+        "size_dataset": 0.99
     },
     "config_other":{
         "warning": false
@@ -15,12 +15,12 @@
     "config_sweep":{
         "method": "random",
         "metric": {
-            "name": "val_loss",
+            "name": "loss",
             "goal": "minimize"
         },
         "parameters": {
             "max_len":{
-                "values": [10, 15, 20]
+                "value": 10
             },
             "embedding_dim":{
                 "values": [40, 50, 60]
@@ -36,17 +36,17 @@
             },
             "learning_rate":{
                 "distribution": "uniform",
-                "min": -2,
-                "max": -4
+                "min": -4,
+                "max": -2
             },
             "batch_size_train":{
-                "values": [8, 16, 32, 64, 128, 512]
+                "values": [8, 16]
             },
             "batch_size_dev":{
                 "value": 8
             },
             "epochs":{
-                "value": 1
+                "value": 50
             }
         }
     }

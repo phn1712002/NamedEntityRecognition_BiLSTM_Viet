@@ -79,16 +79,12 @@ def tuningHyperparamtrer(config=None):
         
         # Create pipeline 
         train_dataset = PipelineNERBiLSTM(vocab_map=vocab_map, 
-                                            tags_map = tags_map,
-                                            dataset=train_raw_dataset, 
-                                            batch_size=config_dataset['batch_size_train'],
-                                            config_model=config_model)()
+                                            tags_map=tags_map,
+                                            config_model=config_model)(dataset=train_raw_dataset, batch_size=config_dataset['batch_size_train'])
 
         dev_dataset = PipelineNERBiLSTM(vocab_map=vocab_map, 
                                         tags_map=tags_map,
-                                        dataset=dev_raw_dataset, 
-                                        batch_size=config_dataset['batch_size_dev'],
-                                        config_model=config_model)()
+                                        config_model=config_model)(dataset=dev_raw_dataset, batch_size=config_dataset['batch_size_dev'])
 
         # Create optimizers
         opt_biLSTM = CustomOptimizers(**config_opt)()

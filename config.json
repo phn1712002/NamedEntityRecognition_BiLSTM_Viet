@@ -1,14 +1,14 @@
 {
     "config_model":{
         "name": "NER_BiLSTM",
-        "max_len": 20,
-        "embedding_dim": 40,
-        "num_layers": 1,
-        "hidden_size": 50,
+        "max_len": 10,
+        "embedding_dim": 50,
+        "num_layers": 2,
+        "hidden_size": 100,
         "rate_dropout": 0.5
     },
     "config_train":{
-        "epochs": 1,
+        "epochs": 100,
         "batch_size_train": 8,
         "batch_size_dev": 8,
         "checkpoint": {
@@ -29,7 +29,7 @@
         "path_json_tags": "./Dataset/raw/config_tags.json"
     },
     "config_opt":{
-        "learning_rate": 0.01
+        "learning_rate": 0.001
     },
     "config_other":{
         "summary": true,

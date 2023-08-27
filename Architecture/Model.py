@@ -22,7 +22,7 @@ class CustomModel():
     def fit(self):
         pass
     
-    def predict(self):
+    def predict(self, input):
         pass
     
 class NERBiLSTM(CustomModel):
