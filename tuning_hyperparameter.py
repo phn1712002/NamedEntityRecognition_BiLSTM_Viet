@@ -50,6 +50,7 @@ from Architecture.Model import NERBiLSTM
 from Architecture.Pipeline import PipelineNERBiLSTM 
 from Optimizers.OptimizersNERBiLSTM import CustomOptimizers
 from wandb.keras import WandbCallback
+from keras.callbacks import EarlyStopping
 def tuningHyperparamtrer(config=None):
     with wandb.init(config=config):
         config = wandb.config
@@ -75,6 +76,11 @@ def tuningHyperparamtrer(config=None):
         
         config_train = {
             "epochs": config.epochs
+        }
+        
+        config_earlystopping = {
+            "monitor": config.monitor,
+            "patience": config.patience
         }
         
         # Create pipeline 
@@ -104,7 +110,8 @@ def tuningHyperparamtrer(config=None):
                                          save_model=False, 
                                          training_data=train_dataset,
                                          validation_data=dev_dataset,
-                                         log_evaluation=True)])
+                                         log_evaluation=True),
+                           EarlyStopping(**config_earlystopping)])
 
 # Tuning 
 wandb.agent(sweep_id, tuningHyperparamtrer, count=config_wandb['count'])
