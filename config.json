@@ -1,10 +1,10 @@
 {
     "config_model":{
         "name": "NER_BiLSTM",
-        "max_len": 10,
-        "embedding_dim": 60,
-        "num_layers": 2,
-        "hidden_size": 256,
+        "max_len": 140,
+        "embedding_dim": 140,
+        "num_layers": 1,
+        "hidden_size": 100,
         "rate_dropout": 0.25
     },
     "config_train":{
