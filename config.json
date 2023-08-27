@@ -3,16 +3,16 @@
         "name": "NER_BiLSTM",
         "max_len": 10,
         "embedding_dim": 60,
-        "num_layers": 1,
+        "num_layers": 2,
         "hidden_size": 256,
-        "rate_dropout": 0.5
+        "rate_dropout": 0.25
     },
     "config_train":{
         "epochs": 100,
         "batch_size_train": 16,
         "batch_size_dev": 8,
         "checkpoint": {
-            "monitor": "loss",
+            "monitor": "accuracy",
             "mode": "auto",
             "verbose": 1
         }
