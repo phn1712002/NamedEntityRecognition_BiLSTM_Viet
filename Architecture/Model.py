@@ -35,6 +35,7 @@ class NERBiLSTM(CustomModel):
                  num_layers=1,
                  hidden_size=512,
                  rate_dropout=0.5,
+                 decode='utf-8',
                  opt=optimizers.Adam(),
                  loss=losses.CategoricalCrossentropy(from_logits=True)):
         super().__init__(vocab_map=vocab_map, tags_map=tags_map, model=None, opt=opt, loss=loss)
@@ -46,6 +47,7 @@ class NERBiLSTM(CustomModel):
         self.num_layers = num_layers
         self.hidden_size= hidden_size
         self.rate_dropout = rate_dropout
+        self.decode = decode
 
     def build(self, summary=False):
         strategy = tf.distribute.MirroredStrategy()
@@ -104,11 +106,12 @@ class NERBiLSTM(CustomModel):
             "embedding_dim": self.embedding_dim,
             "num_layers": self.num_layers,
             "hidden_size": self.hidden_size,
-            "rate_dropout": self.rate_dropout
+            "rate_dropout": self.rate_dropout,
+            "decode": self.decode
         }
         
     def encoderSeq(self, seq=None):
-        seq = seq.numpy().decode('utf-8')
+        seq = seq.numpy().decode(self.decode)
         seq = self.vocab_map.encoderString(str(seq).lower().split())
         seq = np.reshape(seq, newshape=(1, seq.shape[0]))
         seq = pad_sequences(seq, value=self.vocab_map.encoder('PAD'), maxlen=self.max_len, padding='post')
@@ -117,7 +120,7 @@ class NERBiLSTM(CustomModel):
     
     def encoderLable(self, lable=None):
         
-        lable = lable.numpy().decode('utf-8')
+        lable = lable.numpy().decode(self.decode)
         lable = self.tags_map.encoderString(str(lable).lower().split())
         lable = np.reshape(lable, newshape=(1, lable.shape[0]))
         lable = pad_sequences(lable, value=self.tags_map.encoder('PAD'), maxlen=self.max_len, padding='post')

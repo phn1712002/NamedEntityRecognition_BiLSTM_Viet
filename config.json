@@ -1,18 +1,19 @@
 {
     "config_model":{
         "name": "NER_BiLSTM",
-        "max_len": 10,
-        "embedding_dim": 60,
-        "num_layers": 2,
-        "hidden_size": 512,
-        "rate_dropout": 0.1
+        "max_len": 75,
+        "embedding_dim": 40,
+        "num_layers": 1,
+        "hidden_size": 50,
+        "rate_dropout": 0.1,
+        "decode": "UTF-8"
     },
     "config_train":{
-        "epochs": 100,
-        "batch_size_train": 16,
+        "epochs": 50,
+        "batch_size_train": 64,
         "batch_size_dev": 8,
         "checkpoint": {
-            "monitor": "accuracy",
+            "monitor": "loss",
             "mode": "auto",
             "verbose": 1
         }
@@ -21,7 +22,7 @@
         "using": false,
         "api_key": "",
         "project": "NamedEntityRecognition_BiLSTM_Viet",
-        "name": "12-train",
+        "name": "",
         "sync_tensorboard": true
     },
     "config_dataset":{
@@ -29,7 +30,7 @@
         "path_json_tags": "./Dataset/raw/config_tags.json"
     },
     "config_opt":{
-        "learning_rate": 0.01
+        "learning_rate": 0.001
     },
     "config_other":{
         "summary": true,

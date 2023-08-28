@@ -1,3 +1,4 @@
+"""
 import pandas as pd
 from Tools.Json import saveJson
 from Tools.NLP import MapToIndex
@@ -33,6 +34,7 @@ path = './Dataset/'
 df = pd.read_csv(path + 'raw/ner_dataset.csv', encoding = "ISO-8859-1")
 df = df.fillna(method = 'ffill')
 df['Word'] = df['Word'].apply(lambda x: x.lower())
+df['Tag'] = df['Tag'].apply(lambda x: x.lower())
 df = df.drop(['POS'], axis=1)
 
 
@@ -71,4 +73,3 @@ dev_dataset = {
 
 saveH5(path=path + 'raw/train_dataset.h5', data=train_dataset)
 saveH5(path=path + 'raw/dev_dataset.h5', data=dev_dataset)
-"""

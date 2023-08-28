@@ -2,7 +2,6 @@ import tensorflow as tf
 import numpy as np
 from Architecture.Model import NERBiLSTM
 from Tools.NLP import MapToIndex
-from keras import Model
 class PipelineNERBiLSTM(NERBiLSTM):
     def __init__(self, tags_map: MapToIndex, vocab_map: MapToIndex, config_model=None):
         

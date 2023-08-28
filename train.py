@@ -15,7 +15,8 @@ PATH_DATASET = './Dataset/'
 PATH_LOGS = './Checkpoint/logs/'
 PATH_TENSORBOARD = './Checkpoint/tensorboard/'
 PATH_TFLITE = './Checkpoint/export/'
-
+ENCODEING = 'UTF-8'
+ENCODEING
 # Argparse
 parser = argparse.ArgumentParser()
 parser.add_argument('--pretrain_config', type=bool, default=False, help='Pretrain model BiLSTM in logs training in dataset')
@@ -42,7 +43,7 @@ if not config_other['warning']:
     warnings.filterwarnings('ignore')
     
 # Load dataset
-train_raw_dataset, dev_raw_dataset, test_raw_dataset = DatasetNERBiLSTM(path=PATH_DATASET)()
+train_raw_dataset, dev_raw_dataset, test_raw_dataset = DatasetNERBiLSTM(path=PATH_DATASET, encoding=config_model['decode'])()
 
 
 # Load config
