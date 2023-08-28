@@ -25,9 +25,9 @@ class CustomCallbacksWandB(Callback):
                     
             output_tf  = self.model.predict_on_batch(X)
             output = self.pipeline.decoderLable(output_tf)
-            output = np.squeeze(output)
             Y = ' '.join(output)
             X = self.pipeline.decoderSeq(X)
+            X = ' '.join(X)
             
             tableOutputPredict.add_data(epoch + 1, X, Y)
             wandb.log({'Predict': tableOutputPredict})
