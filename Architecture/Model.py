@@ -77,16 +77,16 @@ class NERBiLSTM(CustomModel):
                        callbacks=callbacks)
         return self
         
-    def predict(self, input):
+    def predict(self, input_numpy):
         
-        input_tf, input_size = self.formatInput(input)
+        input_tf, input_size = self.formatInput(input=input_numpy)
         output_tf  = self.model.predict_on_batch(input_tf)
         output = self.formatOutput(output_tf=output_tf, input_size=input_size)
-        return  list(zip(input.split(), output))
+        return  list(zip(input_numpy.split(), output))
     
     def formatInput(self, input):
         input_size = len(input.split())
-        input_tf = self.encoderSeq(input)
+        input_tf = self.encoderSeq(tf.convert_to_tensor(input))
         input_tf = tf.expand_dims(input_tf, axis=0)
         return input_tf, input_size
     
@@ -108,17 +108,17 @@ class NERBiLSTM(CustomModel):
         }
         
     def encoderSeq(self, seq=None):
-        
-        seq = seq.lower()
-        seq = self.vocab_map.encoderString(str(seq).split())
+        seq = seq.numpy().decode('utf-8')
+        seq = self.vocab_map.encoderString(str(seq).lower().split())
         seq = np.reshape(seq, newshape=(1, seq.shape[0]))
         seq = pad_sequences(seq, value=self.vocab_map.encoder('PAD'), maxlen=self.max_len, padding='post')
         seq = np.squeeze(seq)
         return tf.convert_to_tensor(seq, dtype=tf.int32)
     
     def encoderLable(self, lable=None):
-    
-        lable = self.tags_map.encoderString(str(lable).split())
+        
+        lable = lable.numpy().decode('utf-8')
+        lable = self.tags_map.encoderString(str(lable).lower().split())
         lable = np.reshape(lable, newshape=(1, lable.shape[0]))
         lable = pad_sequences(lable, value=self.tags_map.encoder('PAD'), maxlen=self.max_len, padding='post')
         lable = np.squeeze(lable)
@@ -128,15 +128,16 @@ class NERBiLSTM(CustomModel):
     def decoderLable(self, output_tf=None):
 
         output_tf = tf.math.argmax(output_tf, axis=-1)
-        output = output_tf.numpy()
-        output = self.tags_map.decoderVector(output)
+        output = tf.squeeze(output_tf).numpy()
+        output = self.tags_map.decoderVector([output])
+        output = np.squeeze(output)
         return output
     
     def decoderSeq(self, input_tf=None):
         input = tf.squeeze(input_tf).numpy()
         output = self.vocab_map.decoderVector([input])
         output = np.squeeze(output)
-        return ' '.join(output)
+        return output
     
 class NERBiLSTM_tflie(NERBiLSTM):
     def __init__(self, vocab_map, tags_map, config_model=None):

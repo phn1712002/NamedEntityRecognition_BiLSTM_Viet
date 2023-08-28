@@ -9,9 +9,8 @@ class PipelineNERBiLSTM(NERBiLSTM):
         super().__init__(tags_map=tags_map, vocab_map=vocab_map, opt=None, loss=None, **config_model)
  
     def mapProcessing(self, seq, lable):
-       
-        seq = tf.numpy_function(super().encoderSeq, inp=[seq], Tout=tf.int32)
-        lable = tf.numpy_function(super().encoderLable, inp=[lable], Tout=tf.int32)
+        seq = tf.py_function(super().encoderSeq, inp=[seq], Tout=tf.int32)
+        lable = tf.py_function(super().encoderLable, inp=[lable], Tout=tf.int32)
         return (seq, lable)
     
     def __call__(self, dataset, batch_size):

@@ -1,6 +1,5 @@
-
 import pandas as pd
-from Tools.Json import saveJson, loadJson
+from Tools.Json import saveJson
 from Tools.NLP import MapToIndex
 
 
