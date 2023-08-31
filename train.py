@@ -26,14 +26,13 @@ args = parser.parse_args()
 # Get config
 config = loadJson(PATH_CONFIG)
 if not config == None:
-    keys_to_check = ['config_wandb', 'config_model', 'config_opt', 'config_other', 'config_train', 'config_dataset']
+    keys_to_check = ['config_wandb', 'config_model', 'config_opt', 'config_other', 'config_train']
     if all(key in config for key in keys_to_check):
         config_wandb = config['config_wandb']
         config_model = config['config_model']
         config_opt = config['config_opt']
         config_other = config['config_other']
         config_train = config['config_train']
-        config_dataset = config['config_dataset']
     else:
         raise RuntimeError('Error config')
         
@@ -43,11 +42,6 @@ if not config_other['warning']:
     
 # Load dataset
 train_raw_dataset, dev_raw_dataset, test_raw_dataset = DatasetNERBiLSTM(path=PATH_DATASET, encoding=config_model['decode'])()
-
-
-# Load config
-config_vocab = loadJson(config_dataset['path_json_vocab'])
-config_tags = loadJson(config_dataset['path_json_tags'])
 
 # Init vocab and tags
 vocab_map = tensorflow.keras.preprocessing.text.Tokenizer(lower=True, split=' ', filters=' ', oov_token='UNK')

@@ -5,8 +5,6 @@
         "count": 50
     },
     "config_dataset":{
-        "path_json_vocab": "./Dataset/raw/config_vocab.json",
-        "path_json_tags": "./Dataset/raw/config_tags.json",
         "size_dataset": 0.99
     },
     "config_other":{

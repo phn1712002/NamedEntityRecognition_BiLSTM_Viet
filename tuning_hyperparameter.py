@@ -1,8 +1,7 @@
-import warnings, wandb, os
+import warnings, wandb, os, tensorflow
 from Tools.TuningHyper import splitDataset
 from Tools.Json import loadJson
 from Dataset.Createdataset import DatasetNERBiLSTM
-from Tools.NLP import MapToIndex
 from Architecture.Model import NERBiLSTM
 from Architecture.Pipeline import PipelineNERBiLSTM 
 from Optimizers.OptimizersNERBiLSTM import CustomOptimizers
@@ -37,17 +36,16 @@ if not config_other['warning']:
 # Load dataset
 train_raw_dataset, dev_raw_dataset, test_raw_dataset = DatasetNERBiLSTM(path=PATH_DATASET)()
 
+
+# Init vocab and tags
+vocab_map = tensorflow.keras.preprocessing.text.Tokenizer(lower=True, split=' ', filters=' ', oov_token='UNK')
+tags_map = tensorflow.keras.preprocessing.text.Tokenizer(lower=True, split=' ', filters=' ', oov_token='UNK')
+vocab_map.fit_on_texts(train_raw_dataset[0])
+tags_map.fit_on_texts(train_raw_dataset[1])
+
 # Split dataset
 train_raw_dataset = splitDataset(train_raw_dataset, size_dataset=config_dataset['size_dataset'])
 dev_raw_dataset = splitDataset(dev_raw_dataset, size_dataset=config_dataset['size_dataset'])
-
-# Load config
-config_vocab = loadJson(config_dataset['path_json_vocab'])
-config_tags = loadJson(config_dataset['path_json_tags'])
-
-# Init vocab and tags
-vocab_map = MapToIndex().settingWithDict(config_vocab)
-tags_map = MapToIndex().settingWithDict(config_tags)
 
 
 # Tuning Hyperparameter

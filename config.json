@@ -25,10 +25,6 @@
         "name": "",
         "sync_tensorboard": true
     },
-    "config_dataset":{
-        "path_json_vocab": "./Dataset/raw/config_vocab.json",
-        "path_json_tags": "./Dataset/raw/config_tags.json"
-    },
     "config_opt":{
         "learning_rate": 0.001
     },
