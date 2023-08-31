@@ -1,9 +1,10 @@
 import tensorflow as tf
 import numpy as np
 from Architecture.Model import NERBiLSTM
-from Tools.NLP import MapToIndex
+from keras.preprocessing.text import Tokenizer
+
 class PipelineNERBiLSTM(NERBiLSTM):
-    def __init__(self, tags_map: MapToIndex, vocab_map: MapToIndex, config_model=None):
+    def __init__(self, tags_map: Tokenizer, vocab_map: Tokenizer, config_model=None):
         
         super().__init__(tags_map=tags_map, vocab_map=vocab_map, opt=None, loss=None, **config_model)
  

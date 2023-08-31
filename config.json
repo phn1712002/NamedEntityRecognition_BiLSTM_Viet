@@ -19,9 +19,9 @@
         }
     },
     "config_wandb":{
-        "using": false,
+        "using": true,
         "api_key": "",
-        "project": "NamedEntityRecognition_BiLSTM_Viet",
+        "project": "debug",
         "name": "",
         "sync_tensorboard": true
     },

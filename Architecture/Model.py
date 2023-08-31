@@ -1,25 +1,25 @@
 import tensorflow as tf
 import numpy as np
 from keras.utils import to_categorical, pad_sequences
-from keras import optimizers, losses, utils, Model, Input, metrics
+from keras import optimizers, losses, Model, Input, metrics
+from keras.preprocessing.text import Tokenizer
 from keras.layers import LSTM, Embedding, Dense, Bidirectional, TimeDistributed, Dropout
-from Tools.NLP import MapToIndex
 
 class CustomModel():
-    def __init__(self, vocab_map: MapToIndex, tags_map: MapToIndex, model=Model(), loss=losses.CategoricalCrossentropy(from_logits=True), opt=optimizers.Adam()):
+    def __init__(self, vocab_map:Tokenizer, tags_map:Tokenizer, model=Model(), loss=losses.CategoricalCrossentropy(from_logits=True), opt=optimizers.Adam()):
         self.vocab_map = vocab_map
         self.tags_map = tags_map
         self.model = model
         self.loss = loss
         self.opt = opt
         
-    def build(self):
+    def build(self, summary=False):
         pass
     
     def getConfig(self):
         pass
     
-    def fit(self):
+    def fit(self, train_dataset, dev_dataset=None, epochs=1, callbacks=None):
         pass
     
     def predict(self, input):
@@ -27,8 +27,8 @@ class CustomModel():
     
 class NERBiLSTM(CustomModel):
     def __init__(self, 
-                 vocab_map: MapToIndex,
-                 tags_map: MapToIndex,
+                 vocab_map:Tokenizer,
+                 tags_map:Tokenizer,
                  name="NERBiLSTM", 
                  max_len=50,
                  embedding_dim=20,
@@ -41,9 +41,9 @@ class NERBiLSTM(CustomModel):
         super().__init__(vocab_map=vocab_map, tags_map=tags_map, model=None, opt=opt, loss=loss)
         self.name = name
         self.max_len = max_len
-        self.vocab_size = vocab_map.getLenMap()
+        self.vocab_size = len(vocab_map.index_word) + 1
         self.embedding_dim = embedding_dim
-        self.num_tags = tags_map.getLenMap()
+        self.num_tags = len(tags_map.index_word) + 1
         self.num_layers = num_layers
         self.hidden_size= hidden_size
         self.rate_dropout = rate_dropout
@@ -55,13 +55,11 @@ class NERBiLSTM(CustomModel):
             input = Input(shape=(self.max_len, ), name="input")
             
             X = Embedding(input_dim=self.vocab_size, output_dim = self.embedding_dim, input_length = self.max_len, name="embdding", mask_zero=True)(input)
-            X = Dropout(self.rate_dropout)(X)
+            #X = Dropout(self.rate_dropout)(X)
             for i in range(1, self.num_layers + 1):
-                lstm = LSTM(units=self.hidden_size, return_sequences=True, recurrent_dropout=self.rate_dropout)
-                X = Bidirectional(lstm, name=f"Bidirectional_{i}")(X)
+                X = Bidirectional(LSTM(units=self.hidden_size, return_sequences=True, recurrent_dropout=self.rate_dropout), name=f"Bidirectional_{i}")(X)
                 
-            dense = Dense(self.num_tags, activation = 'softmax')
-            output = TimeDistributed(dense, name="TimeDistributed")(X)
+            output = TimeDistributed(Dense(self.num_tags, activation = 'softmax'), name="TimeDistributed")(X)
             
             model = Model(inputs=input, outputs=output, name=self.name)
             model.compile(optimizer=self.opt, loss=self.loss, metrics=[metrics.Accuracy()])
@@ -79,12 +77,12 @@ class NERBiLSTM(CustomModel):
                        callbacks=callbacks)
         return self
         
-    def predict(self, input_numpy):
+    def predict(self, input):
         
-        input_tf, input_size = self.formatInput(input=input_numpy)
+        input_tf, input_size = self.formatInput(input=input)
         output_tf  = self.model.predict_on_batch(input_tf)
         output = self.formatOutput(output_tf=output_tf, input_size=input_size)
-        return  list(zip(input_numpy.split(), output))
+        return  list(zip(input.split(), output))
     
     def formatInput(self, input):
         input_size = len(input.split())
@@ -95,7 +93,7 @@ class NERBiLSTM(CustomModel):
     def formatOutput(self, output_tf, input_size):
         
         output = self.decoderLable(output_tf)
-        output = np.squeeze(output)
+        output = str(output[0]).split()
         output = output[:input_size]
         return output
     
@@ -111,36 +109,36 @@ class NERBiLSTM(CustomModel):
         }
         
     def encoderSeq(self, seq=None):
+        
         seq = seq.numpy().decode(self.decode)
-        seq = self.vocab_map.encoderString(str(seq).lower().split())
-        seq = np.reshape(seq, newshape=(1, seq.shape[0]))
-        seq = pad_sequences(seq, value=self.vocab_map.encoder('PAD'), maxlen=self.max_len, padding='post')
-        seq = np.squeeze(seq)
-        return tf.convert_to_tensor(seq, dtype=tf.int32)
+        seq = self.vocab_map.texts_to_sequences([seq])
+        seq = tf.convert_to_tensor(seq)
+        seq = pad_sequences(seq, value=0, maxlen=self.max_len, padding='post')
+        seq = tf.squeeze(seq)
+        return tf.cast(seq, dtype=tf.int32)
     
     def encoderLable(self, lable=None):
         
         lable = lable.numpy().decode(self.decode)
-        lable = self.tags_map.encoderString(str(lable).lower().split())
-        lable = np.reshape(lable, newshape=(1, lable.shape[0]))
-        lable = pad_sequences(lable, value=self.tags_map.encoder('PAD'), maxlen=self.max_len, padding='post')
-        lable = np.squeeze(lable)
-        lable = [to_categorical(i, num_classes=self.tags_map.getLenMap(), dtype=np.int32) for i in lable]
+        lable = self.tags_map.texts_to_sequences([lable])
+        lable = tf.convert_to_tensor(lable)
+        lable = pad_sequences(lable, value=0, maxlen=self.max_len, padding='post')
+        lable = tf.squeeze(lable)
+        lable = [to_categorical(i, num_classes=self.num_tags, dtype='int32') for i in lable.numpy()]
         return tf.convert_to_tensor(lable, dtype=tf.int32)
     
     def decoderLable(self, output_tf=None):
-
+        
         output_tf = tf.math.argmax(output_tf, axis=-1)
         output = tf.squeeze(output_tf).numpy()
-        output = self.tags_map.decoderVector([output])
-        output = np.squeeze(output)
+        output = self.tags_map.sequences_to_texts([output])
         return output
     
     def decoderSeq(self, input_tf=None):
+        
         input = tf.squeeze(input_tf).numpy()
-        output = self.vocab_map.decoderVector([input])
-        output = np.squeeze(output)
-        return output
+        input = self.vocab_map.sequences_to_texts([input])
+        return input
     
 class NERBiLSTM_tflie(NERBiLSTM):
     def __init__(self, vocab_map, tags_map, config_model=None):
@@ -152,5 +150,5 @@ class NERBiLSTM_tflie(NERBiLSTM):
         output = super().formatOutput(output_tf=output_tf, input_size=input_size)
         return list(zip(input.split(), output))
     
-    def invoke(self, iput):
+    def invoke(self, input_tf):
         pass

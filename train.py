@@ -1,10 +1,9 @@
-import argparse, warnings, wandb
+import argparse, warnings, wandb, tensorflow
 from Tools.Json import loadJson
 from Tools.Callbacks import CreateCallbacks
 from Tools.Weights import loadNearest, loadWeights
 from Tools.TFLite import convertModelKerasToTflite
 from Dataset.Createdataset import DatasetNERBiLSTM
-from Tools.NLP import MapToIndex
 from Architecture.Pipeline import PipelineNERBiLSTM 
 from Optimizers.OptimizersNERBiLSTM import CustomOptimizers
 from Architecture.Model import NERBiLSTM
@@ -16,7 +15,7 @@ PATH_LOGS = './Checkpoint/logs/'
 PATH_TENSORBOARD = './Checkpoint/tensorboard/'
 PATH_TFLITE = './Checkpoint/export/'
 ENCODEING = 'UTF-8'
-ENCODEING
+
 # Argparse
 parser = argparse.ArgumentParser()
 parser.add_argument('--pretrain_config', type=bool, default=False, help='Pretrain model BiLSTM in logs training in dataset')
@@ -51,8 +50,10 @@ config_vocab = loadJson(config_dataset['path_json_vocab'])
 config_tags = loadJson(config_dataset['path_json_tags'])
 
 # Init vocab and tags
-vocab_map = MapToIndex().settingWithDict(config_vocab)
-tags_map = MapToIndex().settingWithDict(config_tags)
+vocab_map = tensorflow.keras.preprocessing.text.Tokenizer(lower=True, split=' ', filters=' ', oov_token='UNK')
+tags_map = tensorflow.keras.preprocessing.text.Tokenizer(lower=True, split=' ', filters=' ', oov_token='UNK')
+vocab_map.fit_on_texts(train_raw_dataset[0])
+tags_map.fit_on_texts(train_raw_dataset[1])
 
 # Create pipeline 
 pipeline = PipelineNERBiLSTM(vocab_map=vocab_map, 
