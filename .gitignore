@@ -2,10 +2,10 @@
 Venv/
 
 # CHECKPOINT
-Checkpoint/logs/*
-Checkpoint/export/*
-Checkpoint/save/*
-Checkpoint/tensorboard/*
+Checkpoint/logs/
+Checkpoint/export/
+Checkpoint/save/
+Checkpoint/tensorboard/
 
 # SAVE
 Dataset/train/*
