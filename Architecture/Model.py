@@ -54,7 +54,7 @@ class NERBiLSTM(CustomModel):
         with strategy.scope():
             input = Input(shape=(self.max_len, ), name="input")
             
-            X = Embedding(input_dim=self.vocab_size, output_dim = self.embedding_dim, input_length = self.max_len, mask_zero=True,name="embdding")(input)
+            X = Embedding(input_dim=self.vocab_size, output_dim = self.embedding_dim, input_length = self.max_len, mask_zero=False, name="embdding")(input)
             X = Dropout(self.rate_dropout)(X)
             for i in range(1, self.num_layers + 1):
                 X = Bidirectional(LSTM(units=self.hidden_size, return_sequences=True, recurrent_dropout=self.rate_dropout), name=f"Bidirectional_{i}")(X)

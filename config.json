@@ -3,13 +3,13 @@
         "name": "NER_BiLSTM",
         "max_len": 10,
         "embedding_dim": 60,
-        "num_layers": 1,
+        "num_layers": 2,
         "hidden_size": 100,
         "rate_dropout": 0.1,
         "decode": "UTF-8"
     },
     "config_train":{
-        "epochs": 10,
+        "epochs": 50,
         "batch_size_train": 64,
         "batch_size_dev": 8,
         "checkpoint": {
