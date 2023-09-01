@@ -1,7 +1,7 @@
 import tensorflow as tf
 import numpy as np
 from keras.utils import to_categorical, pad_sequences
-from keras import optimizers, losses, Model, Input, metrics
+from keras import optimizers, losses, Model, Input
 from keras.preprocessing.text import Tokenizer
 from keras.layers import LSTM, Embedding, Dense, Bidirectional, TimeDistributed, Dropout
 
@@ -54,15 +54,17 @@ class NERBiLSTM(CustomModel):
         with strategy.scope():
             input = Input(shape=(self.max_len, ), name="input")
             
-            X = Embedding(input_dim=self.vocab_size, output_dim = self.embedding_dim, input_length = self.max_len, name="embdding", mask_zero=True)(input)
-            #X = Dropout(self.rate_dropout)(X)
+            X = Embedding(input_dim=self.vocab_size, output_dim = self.embedding_dim, input_length = self.max_len, mask_zero=True,name="embdding")(input)
+            X = Dropout(self.rate_dropout)(X)
             for i in range(1, self.num_layers + 1):
                 X = Bidirectional(LSTM(units=self.hidden_size, return_sequences=True, recurrent_dropout=self.rate_dropout), name=f"Bidirectional_{i}")(X)
                 
+            X = LSTM(units=self.hidden_size * 2, return_sequences=True, recurrent_dropout=self.rate_dropout, name="LSTM")(X) 
             output = TimeDistributed(Dense(self.num_tags, activation = 'softmax'), name="TimeDistributed")(X)
-            
+        
             model = Model(inputs=input, outputs=output, name=self.name)
-            model.compile(optimizer=self.opt, loss=self.loss, metrics=[metrics.Accuracy()])
+         
+            model.compile(optimizer=self.opt, loss=self.loss, metrics=["accuracy"])
         if summary:
             model.summary()
             

@@ -45,7 +45,7 @@ train_raw_dataset, dev_raw_dataset, test_raw_dataset = DatasetNERBiLSTM(path=PAT
 
 # Init vocab and tags
 vocab_map = tensorflow.keras.preprocessing.text.Tokenizer(lower=True, split=' ', filters=' ', oov_token='UNK')
-tags_map = tensorflow.keras.preprocessing.text.Tokenizer(lower=True, split=' ', filters=' ', oov_token='UNK')
+tags_map = tensorflow.keras.preprocessing.text.Tokenizer(lower=False, split=' ', filters=' ', oov_token='UNK')
 vocab_map.fit_on_texts(train_raw_dataset[0])
 tags_map.fit_on_texts(train_raw_dataset[1])
 
@@ -61,8 +61,6 @@ train_dataset = PipelineNERBiLSTM(vocab_map=vocab_map,
 dev_dataset = PipelineNERBiLSTM(vocab_map=vocab_map, 
                                   tags_map=tags_map,
                                   config_model=config_model)(dataset=dev_raw_dataset, batch_size=config_train['batch_size_dev'])
-
-
 
 # Create optimizers
 opt_biLSTM = CustomOptimizers(**config_opt)()

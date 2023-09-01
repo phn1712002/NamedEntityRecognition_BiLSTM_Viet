@@ -1,15 +1,15 @@
 {
     "config_model":{
         "name": "NER_BiLSTM",
-        "max_len": 75,
-        "embedding_dim": 40,
+        "max_len": 10,
+        "embedding_dim": 60,
         "num_layers": 1,
-        "hidden_size": 50,
+        "hidden_size": 100,
         "rate_dropout": 0.1,
         "decode": "UTF-8"
     },
     "config_train":{
-        "epochs": 50,
+        "epochs": 10,
         "batch_size_train": 64,
         "batch_size_dev": 8,
         "checkpoint": {
@@ -19,9 +19,9 @@
         }
     },
     "config_wandb":{
-        "using": true,
+        "using": false,
         "api_key": "",
-        "project": "debug",
+        "project": "",
         "name": "",
         "sync_tensorboard": true
     },

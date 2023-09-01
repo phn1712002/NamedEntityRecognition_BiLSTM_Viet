@@ -10,12 +10,12 @@ class importTXT():
         vocab = []
         with open(self.path + 'input_string.txt', 'r', encoding=self.encoding) as file:
                 for line in file:
-                    vocab.append(line.strip().lower())
+                    vocab.append(line.strip())
                     
         tags = []
         with open(self.path + 'file_name_lable.txt', 'r', encoding=self.encoding) as file:
                 for line in file:
-                    tags.append(line.strip().lower())
+                    tags.append(line.strip())
                 
                     
         return vocab, tags
