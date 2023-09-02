@@ -1,5 +1,6 @@
 import os
 import tensorflow as tf
+import numpy as np
 from keras.utils import to_categorical, pad_sequences
 from Tools.Json import loadJson
 from Tools.File import loadFile
@@ -83,23 +84,27 @@ class NERBiLSTM(CustomModel):
         
     def predict(self, input):
         
-        input_tf, input_size = self.formatInput(input=input)
-        output_tf  = self.model.predict_on_batch(input_tf)
-        output = self.formatOutput(output_tf=output_tf, input_size=input_size)
-        return  list(zip(input.split(), output))
+        input_tf = self.formatInput(input=input)
+        output_tf = self.model.predict_on_batch(input_tf)
+        output = self.decoderLable(output_tf)
+        return  list(zip(input.split(), output.split()))
     
     def formatInput(self, input):
         input_size = len(input.split())
-        input_tf = self.encoderSeq(tf.convert_to_tensor(input))
-        input_tf = tf.expand_dims(input_tf, axis=0)
-        return input_tf, input_size
+        input_split = input.split()
+        list_tf = []
+        if input_size > self.max_len + 1:
+            for index in range(0, len(input_split) + 1 - self.max_len):
+                begin = index
+                end = begin + self.max_len
+                input_join = ' '.join(input_split[begin:end])    
+                input_tf = self.encoderSeq(tf.convert_to_tensor(input_join))
+                list_tf.append(input_tf)
+        else:
+            input_tf = self.encoderSeq(tf.convert_to_tensor(input))
+            list_tf.append(input_tf)
+        return tf.convert_to_tensor(list_tf)
     
-    def formatOutput(self, output_tf, input_size):
-        
-        output = self.decoderLable(output_tf)
-        output = str(output[0]).split()
-        output = output[:input_size]
-        return output
     
     def getConfig(self):
         return {
@@ -135,8 +140,23 @@ class NERBiLSTM(CustomModel):
         
         output_tf = tf.math.argmax(output_tf, axis=-1)
         output = tf.squeeze(output_tf).numpy()
-        output = self.tags_map.sequences_to_texts([output])
-        return output
+        if output_tf.shape[0] == 1:
+            output = self.tags_map.sequences_to_texts([output])
+        else: 
+            format_output = None
+            for index in range(0, len(output) - 1):
+                if index == 0: format_output = output[index]
+                
+                extended_matrix_1 = np.append(format_output, np.NINF)
+        
+                num_value_insert = index + 1
+                value_to_insert = np.ones(num_value_insert) * np.NINF
+                extended_matrix_2 = np.insert(output[index + 1], 0, value_to_insert)
+                
+                format_output = np.vstack((extended_matrix_1, extended_matrix_2))
+                format_output = np.max(format_output, axis=0)
+            output = self.tags_map.sequences_to_texts([format_output])
+        return output[0]
     
     def decoderSeq(self, input_tf=None):
         
@@ -153,7 +173,6 @@ class NERBiLSTM_tflite(NERBiLSTM):
         self.index_input = None
         self.index_ouput = None
         self.dtype_input = None
-        
         
         if os.path.exists(path):
             path_json_vocab = path + name_file + '_vocab.json'
@@ -177,13 +196,15 @@ class NERBiLSTM_tflite(NERBiLSTM):
         return self
     
     def predict(self, input):
-        input_tf, input_size = super().formatInput(input)
+        input_tf = super().formatInput(input)
         output_tf  = self.__invoke(input_tf)
-        output = super().formatOutput(output_tf=output_tf, input_size=input_size)
-        return list(zip(input.split(), output))
+        output = super().decoderLable(output_tf)
+        return list(zip(input.split(), output.split()))
     
     def __invoke(self, input_tf):
         model = self.model
+        shape_input = (input_tf.shape[0], input_tf.shape[1])
+        model.resize_tensor_input(self.index_input, shape_input)
         model.allocate_tensors()
         model.set_tensor(self.index_input, tf.cast(input_tf, dtype=self.dtype_input))
         model.invoke()
