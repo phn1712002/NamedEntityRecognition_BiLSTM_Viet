@@ -3,7 +3,6 @@ import tensorflow as tf
 import numpy as np
 from keras.utils import to_categorical, pad_sequences
 from Tools.Json import loadJson
-from Tools.File import loadFile
 from keras import optimizers, losses, Model, Input
 from keras.preprocessing.text import Tokenizer
 from keras.layers import LSTM, Embedding, Dense, Bidirectional, TimeDistributed, Dropout
@@ -180,8 +179,8 @@ class NERBiLSTM_tflite(NERBiLSTM):
             path_json_config = path + name_file + '.json'
             
             config_model = loadJson(path=path_json_config)
-            config_vocab = loadFile(path=path_json_vocab, encoding=None)
-            config_tags = loadFile(path=path_json_tag, encoding=None)
+            config_vocab = loadJson(path=path_json_vocab, encoding=None)
+            config_tags = loadJson(path=path_json_tag, encoding=None)
             vocab_map = tf.keras.preprocessing.text.tokenizer_from_json(config_vocab)
             tags_map = tf.keras.preprocessing.text.tokenizer_from_json(config_tags)
             super().__init__(vocab_map=vocab_map, tags_map=tags_map, **config_model)
