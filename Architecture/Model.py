@@ -142,8 +142,8 @@ class NERBiLSTM(CustomModel):
         input = self.vocab_map.sequences_to_texts([input])
         return input
     
-class NERBiLSTM_tflie(NERBiLSTM):
-    def __init__(self, name_file='BiLSTM', path='./Checkpoint/export/'):
+class NERBiLSTM_tflite(NERBiLSTM):
+    def __init__(self, name_file='NER_BiLSTM', path='./Checkpoint/export/'):
         
         self.name_file = name_file
         self.path = path
