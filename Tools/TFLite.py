@@ -7,9 +7,9 @@ def convertModelKerasToTflite(class_model: CustomModel, path="./Checkpoint/expor
     
     # Convert to tflite
     converter = tf.lite.TFLiteConverter.from_keras_model(class_model.model)
-    converter.optimizations = [tf.lite.Optimize.DEFAULT]
-    converter.experimental_new_converter=True
-    converter.target_spec.supported_ops = [tf.lite.OpsSet.TFLITE_BUILTINS, tf.lite.OpsSet.SELECT_TF_OPS]
+    #converter.optimizations = [tf.lite.Optimize.DEFAULT]
+    #onverter.experimental_new_converter=True
+    #converter.target_spec.supported_ops = [tf.lite.OpsSet.TFLITE_BUILTINS, tf.lite.OpsSet.SELECT_TF_OPS]
     tflite_model = converter.convert()
     
     # Get config model

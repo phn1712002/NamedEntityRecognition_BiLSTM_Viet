@@ -1,10 +1,10 @@
 import tensorflow as tf
-import numpy as np
+import os
 from keras.utils import to_categorical, pad_sequences
 from keras import optimizers, losses, Model, Input
 from keras.preprocessing.text import Tokenizer
 from keras.layers import LSTM, Embedding, Dense, Bidirectional, TimeDistributed, Dropout
-
+from Tools.Json import loadJson
 class CustomModel():
     def __init__(self, vocab_map:Tokenizer, tags_map:Tokenizer, model=Model(), loss=losses.CategoricalCrossentropy(from_logits=True), opt=optimizers.Adam()):
         self.vocab_map = vocab_map
@@ -143,14 +143,46 @@ class NERBiLSTM(CustomModel):
         return input
     
 class NERBiLSTM_tflie(NERBiLSTM):
-    def __init__(self, vocab_map, tags_map, config_model=None):
-        super().__init__(vocab_map=vocab_map, tags_map=tags_map, opt=None, loss=None, **config_model)
+    def __init__(self, name_file='BiLSTM', path='./Checkpoint/export/'):
         
+        self.name_file = name_file
+        self.path = path
+        
+        self.index_input = None
+        self.index_ouput = None
+        self.dtype_input = None
+        
+        
+        if os.path.exists(path):
+            path_json_vocab = path + name_file + '_vocab.json'
+            path_json_tag = path + name_file + '_tag.json'
+            path_json_config = path + name_file + '.json'
+            
+            config_model = loadJson(path=path_json_config)
+            vocab_map = tf.keras.preprocessing.text.tokenizer_from_json(path_json_vocab)
+            tags_map = tf.keras.preprocessing.text.tokenizer_from_json(path_json_tag)
+            super().__init__(vocab_map=vocab_map, tags_map=tags_map, **config_model)
+        else:
+            raise RuntimeError('Model load error')
+            
+    def build(self):
+        self.model = tf.lite.Interpreter(model_path=self.path + self.name_file + '.tflite')
+        self.index_input = self.model.get_input_details()[0]['index']
+        self.index_ouput = self.model.get_output_details()[1]['index']
+        return self
+    
     def predict(self, input):
         input_tf, input_size = super().formatInput(input)
-        output_tf  = self.invoke(input_tf)
+        output_tf  = self.__invoke(input_tf)
         output = super().formatOutput(output_tf=output_tf, input_size=input_size)
         return list(zip(input.split(), output))
     
-    def invoke(self, input_tf):
-        pass
+    def __invoke(self, input_tf):
+        shape_input = (input_tf.shape[0], input_tf.shape[1], input_tf.shape[2])
+        self.model.resize_tensor_input(self.index_input, shape_input)
+        self.model.allocate_tensors()
+        self.model.set_tensor(self.index_input, input_tf)
+        self.model.invoke()
+        ouput = self.model.get_tensor(self.index_ouput)
+        tf_output = tf.convert_to_tensor(ouput)
+        return tf_output

@@ -14,7 +14,6 @@ PATH_DATASET = './Dataset/'
 PATH_LOGS = './Checkpoint/logs/'
 PATH_TENSORBOARD = './Checkpoint/tensorboard/'
 PATH_TFLITE = './Checkpoint/export/'
-ENCODEING = 'UTF-8'
 
 # Argparse
 parser = argparse.ArgumentParser()
