@@ -5,7 +5,7 @@ with open('requirements.txt') as f:
     requirements = f.read().splitlines()
 
 setup(
-    name='RemoveNoiseSpeech_WaveUnet_VietAE',
+    name='NamedEntityRecognition_BiLSTM_Viet',
     packages=find_packages(),
     install_requires=requirements,
 )
