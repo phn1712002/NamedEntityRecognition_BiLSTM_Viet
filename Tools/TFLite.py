@@ -23,7 +23,7 @@ def convertModelKerasToTflite(class_model: CustomModel, path="./Checkpoint/expor
         # Path config
         path_tflite = path + class_model.name + '.tflite' 
         path_json_vocab = path + class_model.name + '_vocab.json'
-        path_json_tag = path + class_model.name + '_tag.json'
+        path_json_tag = path + class_model.name + '_tags.json'
         path_json_config = path + class_model.name + '.json'
         
         # Save

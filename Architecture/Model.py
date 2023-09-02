@@ -176,7 +176,7 @@ class NERBiLSTM_tflite(NERBiLSTM):
         
         if os.path.exists(path):
             path_json_vocab = path + name_file + '_vocab.json'
-            path_json_tag = path + name_file + '_tag.json'
+            path_json_tag = path + name_file + '_tags.json'
             path_json_config = path + name_file + '.json'
             
             config_model = loadJson(path=path_json_config)
