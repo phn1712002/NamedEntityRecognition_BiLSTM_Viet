@@ -1,3 +1,4 @@
+import os
 import tensorflow as tf
 from Tools.Json import saveJson
 from Tools.File import saveFile
@@ -18,7 +19,6 @@ def convertModelKerasToTflite(class_model: CustomModel, path="./Checkpoint/expor
         config_model = class_model.getConfig()
         config_vocab = class_model.vocab_map.to_json()
         config_tags = class_model.tags_map.to_json()
-        encoding_model = class_model.decode
         
         # Path config
         path_tflite = path + class_model.name + '.tflite' 
@@ -28,8 +28,8 @@ def convertModelKerasToTflite(class_model: CustomModel, path="./Checkpoint/expor
         
         # Save
         saveJson(path=path_json_config, data=config_model)
-        saveFile(path=path_json_vocab, data=config_vocab, encoding=encoding_model)  
-        saveFile(path=path_json_tag, data=config_tags, encoding=encoding_model) 
+        saveFile(path=path_json_vocab, data=config_vocab, encoding=None)  
+        saveFile(path=path_json_tag, data=config_tags, encoding=None) 
         tf.io.write_file(filename=path_tflite, contents=tflite_model)
         
         print(f"Export model to tflite filename:{path_tflite} and json:{path_json_config}")

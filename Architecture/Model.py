@@ -1,10 +1,12 @@
-import tensorflow as tf
 import os
+import tensorflow as tf
 from keras.utils import to_categorical, pad_sequences
+from Tools.Json import loadJson
+from Tools.File import loadFile
 from keras import optimizers, losses, Model, Input
 from keras.preprocessing.text import Tokenizer
 from keras.layers import LSTM, Embedding, Dense, Bidirectional, TimeDistributed, Dropout
-from Tools.Json import loadJson
+
 class CustomModel():
     def __init__(self, vocab_map:Tokenizer, tags_map:Tokenizer, model=Model(), loss=losses.CategoricalCrossentropy(from_logits=True), opt=optimizers.Adam()):
         self.vocab_map = vocab_map
@@ -159,8 +161,10 @@ class NERBiLSTM_tflite(NERBiLSTM):
             path_json_config = path + name_file + '.json'
             
             config_model = loadJson(path=path_json_config)
-            vocab_map = tf.keras.preprocessing.text.tokenizer_from_json(path_json_vocab)
-            tags_map = tf.keras.preprocessing.text.tokenizer_from_json(path_json_tag)
+            config_vocab = loadFile(path=path_json_vocab, encoding=None)
+            config_tags = loadFile(path=path_json_tag, encoding=None)
+            vocab_map = tf.keras.preprocessing.text.tokenizer_from_json(config_vocab)
+            tags_map = tf.keras.preprocessing.text.tokenizer_from_json(config_tags)
             super().__init__(vocab_map=vocab_map, tags_map=tags_map, **config_model)
         else:
             raise RuntimeError('Model load error')
@@ -168,7 +172,8 @@ class NERBiLSTM_tflite(NERBiLSTM):
     def build(self):
         self.model = tf.lite.Interpreter(model_path=self.path + self.name_file + '.tflite')
         self.index_input = self.model.get_input_details()[0]['index']
-        self.index_ouput = self.model.get_output_details()[1]['index']
+        self.dtype_input = self.model.get_input_details()[0]['dtype']
+        self.index_ouput = self.model.get_output_details()[0]['index']
         return self
     
     def predict(self, input):
@@ -178,11 +183,10 @@ class NERBiLSTM_tflite(NERBiLSTM):
         return list(zip(input.split(), output))
     
     def __invoke(self, input_tf):
-        shape_input = (input_tf.shape[0], input_tf.shape[1], input_tf.shape[2])
-        self.model.resize_tensor_input(self.index_input, shape_input)
-        self.model.allocate_tensors()
-        self.model.set_tensor(self.index_input, input_tf)
-        self.model.invoke()
-        ouput = self.model.get_tensor(self.index_ouput)
+        model = self.model
+        model.allocate_tensors()
+        model.set_tensor(self.index_input, tf.cast(input_tf, dtype=self.dtype_input))
+        model.invoke()
+        ouput = model.get_tensor(self.index_ouput)
         tf_output = tf.convert_to_tensor(ouput)
         return tf_output
