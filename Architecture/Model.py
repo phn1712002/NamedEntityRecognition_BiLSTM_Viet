@@ -136,25 +136,41 @@ class NERBiLSTM(CustomModel):
         return tf.convert_to_tensor(lable, dtype=tf.int32)
     
     def decoderLable(self, output_tf=None):
-        
-        output_tf = tf.math.argmax(output_tf, axis=-1)
-        output = tf.squeeze(output_tf).numpy()
+                        
         if output_tf.shape[0] == 1:
+            output_tf = tf.math.argmax(output_tf, axis=-1)
+            output = tf.squeeze(output_tf).numpy()
             output = self.tags_map.sequences_to_texts([output])
-        else: 
-            format_output = None
-            for index in range(0, len(output) - 1):
-                if index == 0: format_output = output[index]
+        else:
+            max_index = tf.math.argmax(output_tf, axis=-1)
+            max_index = tf.squeeze(max_index).numpy() 
+            
+            max_prob = tf.math.reduce_max(output_tf, axis=-1)
+            max_prob = tf.squeeze(max_prob).numpy() 
+            
+            max_index_join = None
+            max_index_join = None
+            for index in range(0, len(max_prob) - 1):
                 
-                extended_matrix_1 = np.append(format_output, np.NINF)
-        
+                if index == 0: 
+                    max_index_join = max_index[index]
+                    max_prob_join = max_prob[index]
+                
+                extended_matrix_1_prob = np.append(max_prob_join, 0)
+                extended_matrix_1_index = np.append(max_index_join, 0)
+                
                 num_value_insert = index + 1
-                value_to_insert = np.ones(num_value_insert) * np.NINF
-                extended_matrix_2 = np.insert(output[index + 1], 0, value_to_insert)
+                value_to_insert = np.zeros(num_value_insert)
+                extended_matrix_2_prob = np.insert(max_prob[index + 1], 0, value_to_insert)
+                extended_matrix_2_index = np.insert(max_index[index + 1], 0, value_to_insert)
                 
-                format_output = np.vstack((extended_matrix_1, extended_matrix_2))
-                format_output = np.max(format_output, axis=0)
-            output = self.tags_map.sequences_to_texts([format_output])
+                max_prob_join = np.max(np.vstack((extended_matrix_1_prob, extended_matrix_2_prob)), axis=0)
+                max_index_join = []
+                for i in range(0, len(max_prob_join)):
+                    if max_prob_join[i] == extended_matrix_1_prob[i]: max_index_join.append(extended_matrix_1_index[i])
+                    else: max_index_join.append(extended_matrix_2_index[i])
+                            
+            output = self.tags_map.sequences_to_texts([max_index_join])
         return output[0]
     
     def decoderSeq(self, input_tf=None):
